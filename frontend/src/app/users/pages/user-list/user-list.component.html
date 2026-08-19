@@ -1,0 +1,58 @@
+<section aria-labelledby="users-heading">
+  <div class="d-flex flex-column flex-sm-row gap-3 justify-content-between align-items-sm-center mb-4">
+    <div>
+      <h1 id="users-heading" class="h2 mb-1">Registered users</h1>
+      <p class="text-body-secondary mb-0">Select Edit to update a user's details.</p>
+    </div>
+    <a class="btn btn-primary align-self-start" routerLink="/users/new">Create User</a>
+  </div>
+
+  @if (error$ | async; as error) {
+    <div class="alert alert-danger d-flex flex-column flex-sm-row gap-2 justify-content-between" role="alert">
+      <span>{{ error }}</span>
+      <button class="btn btn-sm btn-outline-danger align-self-start" type="button" (click)="retry()">Retry</button>
+    </div>
+  }
+
+  @if (loading$ | async) {
+    <div class="d-flex align-items-center gap-2" role="status" aria-live="polite">
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      <span>Loading users…</span>
+    </div>
+  } @else {
+    @if (users$ | async; as users) {
+      @if (users.length) {
+        <div class="table-responsive bg-white rounded shadow-sm">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">First Name</th>
+                <th scope="col">Last Name</th>
+                <th scope="col">Email</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of users; track user.id) {
+                <tr>
+                  <td>{{ user.firstName }}</td>
+                  <td>{{ user.lastName }}</td>
+                  <td><a [href]="'mailto:' + user.email">{{ user.email }}</a></td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary" [routerLink]="['/users', user.id, 'edit']"
+                       [attr.aria-label]="'Edit ' + user.firstName + ' ' + user.lastName">Edit</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else if (!(error$ | async)) {
+        <div class="alert alert-info" role="status">No users have been registered yet.</div>
+      }
+    }
+  }
+
+  <a class="btn btn-link px-0 mt-3" routerLink="/">Back to home</a>
+</section>
+

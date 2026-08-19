@@ -1,0 +1,16 @@
+body {
+  min-width: 320px;
+  background: var(--bs-tertiary-bg);
+}
+
+.page-card {
+  max-width: 760px;
+}
+
+.form-control.ng-invalid.ng-touched {
+  border-color: var(--bs-form-invalid-border-color);
+}
+
+.form-control.ng-valid.ng-touched {
+  border-color: var(--bs-form-valid-border-color);
+}

@@ -1,0 +1,12 @@
+.gradle/
+.idea/
+.vscode/
+*.iml
+*.log
+.DS_Store
+build/
+backend/build/
+frontend/.angular/
+frontend/node_modules/
+frontend/dist/
+database/data/
