@@ -45,7 +45,17 @@ manage create and edit form state and validation.
 
 ## Run with Docker
 
-Docker with Docker Compose is required.
+Docker Engine with the Docker Compose v2 plugin is the only runtime prerequisite. JDK, Gradle,
+Node.js, npm, Nginx, and H2 are provided by the containers.
+
+| Host OS | Docker setup |
+| --- | --- |
+| macOS | Docker Desktop using Linux containers |
+| Windows | Docker Desktop using Linux containers; the default WSL 2 backend is suitable |
+| Linux | Docker Engine with the Docker Compose v2 plugin |
+
+Run all Compose commands from the repository root. The commands are identical in macOS and
+Linux terminals, Windows PowerShell, and Windows Command Prompt.
 
 ```bash
 docker compose up --build
@@ -160,11 +170,14 @@ The backend returns field-level validation errors with `400 Bad Request`, missin
 
 ## Tests
 
-Backend tests require JDK 26. The Gradle wrapper is included:
+Backend tests require JDK 26. The Gradle wrapper includes launchers for both POSIX systems and
+Windows.
 
-```bash
-./gradlew :backend:test
-```
+| Host shell | Backend tests |
+| --- | --- |
+| macOS or Linux | `./gradlew :backend:test` |
+| Windows PowerShell | `.\gradlew.bat :backend:test` |
+| Windows Command Prompt | `gradlew.bat :backend:test` |
 
 The backend suite includes a service integration test against an isolated in-memory H2
 database with Flyway migrations and a controller test with a mocked `UserService`.
@@ -181,8 +194,31 @@ npm run test:ci
 The frontend suite covers Reactive Form validation, the NgRx reducer, and responsive user-list
 markup.
 
-Run both backend and frontend suites from the repository root (JDK, Node.js, and npm required):
+Run both backend and frontend suites from the repository root (JDK, Node.js, and npm required).
+The Gradle build automatically uses `npm.cmd` on Windows and `npm` elsewhere.
 
-```bash
-./gradlew check
-```
+| Host shell | All tests |
+| --- | --- |
+| macOS or Linux | `./gradlew check` |
+| Windows PowerShell | `.\gradlew.bat check` |
+| Windows Command Prompt | `gradlew.bat check` |
+
+## Platform portability
+
+- Docker Compose uses only relative project paths and named volumes; there are no host-specific
+  absolute paths.
+- The container images do not pin a CPU architecture and can use the architecture supported by
+  the selected base images.
+- Development source mounts and Angular polling work with Docker Engine on Linux and Docker
+  Desktop file sharing on macOS and Windows.
+- `.gitattributes` preserves Unix line endings for scripts executed inside Linux containers and
+  Windows line endings for batch files, independent of the developer's Git `core.autocrlf`
+  setting.
+- The otherwise-empty `frontend/public` directory is retained in Git, so production builds and
+  development bind mounts work immediately after a fresh clone.
+- Both `gradlew` and `gradlew.bat` are included, and Gradle selects the host-appropriate npm
+  executable.
+
+The application containers provide Java, Node.js, npm, Nginx, and H2 themselves. Host
+installations of JDK 26, a supported Node.js version, and npm are needed only when running tests
+or builds outside Docker.

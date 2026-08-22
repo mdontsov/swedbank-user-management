@@ -1,0 +1,16 @@
+* text=auto
+
+# Scripts executed in Linux containers must retain Unix line endings.
+*.sh text eol=lf
+gradlew text eol=lf
+
+# Keep the native Windows Gradle launcher usable after checkout.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Container and database configuration is interpreted in Linux containers.
+Dockerfile text eol=lf
+Dockerfile.* text eol=lf
+*.sql text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
