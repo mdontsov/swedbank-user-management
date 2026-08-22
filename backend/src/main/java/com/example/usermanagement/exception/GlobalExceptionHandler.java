@@ -1,4 +1,4 @@
-package com.example.usermanagement.common.error;
+package com.example.usermanagement.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -20,13 +20,20 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ApiError> handleNotFound(UserNotFoundException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiException> handleNotFound(UserNotFoundException exception, HttpServletRequest request) {
         return response(HttpStatus.NOT_FOUND, exception.getMessage(), request, Map.of());
     }
 
+    @ExceptionHandler(DuplicatedEmailException.class)
+    public ResponseEntity<ApiException> handleEmailConflict(DuplicatedEmailException exception,
+                                                            HttpServletRequest request) {
+        return response(HttpStatus.CONFLICT, exception.getMessage(), request,
+                Map.of("email", exception.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException exception,
-                                                      HttpServletRequest request) {
+    public ResponseEntity<ApiException> handleValidation(MethodArgumentNotValidException exception,
+                                                         HttpServletRequest request) {
         Map<String, String> fieldErrors = new LinkedHashMap<>();
         exception.getBindingResult().getFieldErrors().forEach(error ->
                 fieldErrors.putIfAbsent(error.getField(), error.getDefaultMessage()));
@@ -34,22 +41,22 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ApiError> handleConflict(DataIntegrityViolationException exception,
-                                                    HttpServletRequest request) {
+    public ResponseEntity<ApiException> handleConflict(DataIntegrityViolationException exception,
+                                                       HttpServletRequest request) {
         log.warn("Database constraint violation", exception);
-        return response(HttpStatus.CONFLICT, "The request conflicts with existing data", request, Map.of());
+        String message = "Email is already registered";
+        return response(HttpStatus.CONFLICT, message, request, Map.of("email", message));
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiError> handleUnexpected(RuntimeException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiException> handleUnexpected(RuntimeException exception, HttpServletRequest request) {
         log.error("Unexpected backend error", exception);
         return response(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", request, Map.of());
     }
 
-    private ResponseEntity<ApiError> response(HttpStatus status, String message, HttpServletRequest request,
-                                              Map<String, String> fieldErrors) {
-        ApiError body = new ApiError(Instant.now(), status.value(), message, request.getRequestURI(), fieldErrors);
+    private ResponseEntity<ApiException> response(HttpStatus status, String message, HttpServletRequest request,
+                                                  Map<String, String> fieldErrors) {
+        ApiException body = new ApiException(Instant.now(), status.value(), message, request.getRequestURI(), fieldErrors);
         return ResponseEntity.status(status).body(body);
     }
 }
-

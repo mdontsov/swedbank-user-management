@@ -1,0 +1,68 @@
+services:
+  database:
+    build:
+      context: ./database
+      args:
+        H2_VERSION: 2.4.240
+    environment:
+      H2_USER: ${H2_USER:-sa}
+      H2_PASSWORD: ${H2_PASSWORD:-password}
+      H2_DATABASE: ${H2_DATABASE:-userdb}
+    volumes:
+      - h2-dev-data:/data
+    expose:
+      - "9092"
+    healthcheck:
+      test: ["CMD-SHELL", "java -cp /opt/h2/h2.jar org.h2.tools.Shell -url 'jdbc:h2:tcp://localhost:9092//data/$${H2_DATABASE}' -user '$${H2_USER}' -password '$${H2_PASSWORD}' -sql 'SELECT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.dev
+    environment:
+      DB_URL: jdbc:h2:tcp://database:9092//data/${H2_DATABASE:-userdb}
+      DB_USER: ${H2_USER:-sa}
+      DB_PASSWORD: ${H2_PASSWORD:-password}
+      JAVA_TOOL_OPTIONS: -Xmx256m
+      GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx192m
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/src:/workspace/backend/src
+      - gradle-dev-cache:/root/.gradle
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/actuator/health >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+    init: true
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NODE_OPTIONS: --max-old-space-size=384
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - frontend-dev-cache:/app/.angular
+    init: true
+
+volumes:
+  h2-dev-data:
+  gradle-dev-cache:
+  frontend-dev-cache:

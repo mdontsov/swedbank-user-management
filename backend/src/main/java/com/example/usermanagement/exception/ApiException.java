@@ -1,9 +1,9 @@
-package com.example.usermanagement.common.error;
+package com.example.usermanagement.exception;
 
 import java.time.Instant;
 import java.util.Map;
 
-public record ApiError(
+public record ApiException(
         Instant timestamp,
         int status,
         String error,

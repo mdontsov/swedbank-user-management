@@ -1,9 +1,11 @@
 package com.example.usermanagement.user;
 
-import com.example.usermanagement.common.error.UserNotFoundException;
-import com.example.usermanagement.user.api.UserRequest;
-import com.example.usermanagement.user.api.UserResponse;
-import com.example.usermanagement.user.domain.UserService;
+import com.example.usermanagement.exception.DuplicatedEmailException;
+import com.example.usermanagement.exception.UserNotFoundException;
+import com.example.usermanagement.api.UserRequest;
+import com.example.usermanagement.api.UserResponse;
+import com.example.usermanagement.api.controller.UserController;
+import com.example.usermanagement.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -23,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(com.example.usermanagement.user.api.UserController.class)
+@WebMvcTest(UserController.class)
 class UserControllerTest {
 
     @Autowired
@@ -95,5 +97,20 @@ class UserControllerTest {
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.error").value("An unexpected error occurred"));
+    }
+
+    @Test
+    void mapsDuplicateEmailThroughRestControllerAdvice() throws Exception {
+        when(userService.create(any(UserRequest.class)))
+                .thenThrow(new DuplicatedEmailException());
+
+        mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"firstName":"Ada","lastName":"Lovelace","email":"ada@example.com"}
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Email is already registered"))
+                .andExpect(jsonPath("$.fieldErrors.email").value("Email is already registered"));
     }
 }

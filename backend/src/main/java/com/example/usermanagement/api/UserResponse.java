@@ -1,6 +1,6 @@
-package com.example.usermanagement.user.api;
+package com.example.usermanagement.api;
 
-import com.example.usermanagement.user.domain.User;
+import com.example.usermanagement.entity.User;
 
 public record UserResponse(Long id, String firstName, String lastName, String email) {
 

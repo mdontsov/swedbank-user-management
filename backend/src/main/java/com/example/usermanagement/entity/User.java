@@ -1,4 +1,4 @@
-package com.example.usermanagement.user.domain;
+package com.example.usermanagement.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,7 +26,7 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
-    @Column(nullable = false, length = 320)
+    @Column(nullable = false, unique = true, length = 320)
     private String email;
 
     public User(String firstName, String lastName, String email) {

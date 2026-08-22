@@ -1,7 +1,7 @@
-package com.example.usermanagement.user.domain;
+package com.example.usermanagement.service;
 
-import com.example.usermanagement.user.api.UserRequest;
-import com.example.usermanagement.user.api.UserResponse;
+import com.example.usermanagement.api.UserRequest;
+import com.example.usermanagement.api.UserResponse;
 
 import java.util.List;
 

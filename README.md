@@ -33,6 +33,39 @@ To also remove the persisted H2 data:
 docker compose down --volumes
 ```
 
+## Development mode
+
+Use the development Compose file while changing frontend or backend code:
+
+```bash
+docker compose -f compose.dev.yaml up --build
+```
+
+Open <http://localhost:4200>. The backend API is also available directly at
+<http://localhost:8080/api/users>.
+
+- Angular recompiles and refreshes the browser when files under `frontend/` change.
+- The backend runs with Gradle `bootRun`. After changing Java code, restart only that
+  container to compile and run the changes:
+
+  ```bash
+  docker compose -f compose.dev.yaml restart backend
+  ```
+
+- Dependency caches and development database data are held in named volumes.
+
+Changes under `frontend/src`, `frontend/public`, or `backend/src` are available inside
+their containers immediately. Rebuild the relevant development image after changing a
+package manifest, Gradle build file, or other project configuration.
+
+Stop the development services with:
+
+```bash
+docker compose -f compose.dev.yaml down
+```
+
+Add `--volumes` to that command when you also want to clear all development caches and data.
+
 ## Run tests locally
 
 Backend tests require JDK 26. No global Gradle installation is needed:
@@ -82,5 +115,4 @@ All runtime exceptions are converted to sanitized JSON responses by the backend'
 - Tests use an isolated in-memory H2 database and run the same Flyway migration.
 - Hibernate uses `ddl-auto: validate`; it never creates or updates the schema.
 - The responsive UI uses Bootstrap's mobile-first grid and a responsive table wrapper.
-- Email addresses are validated but are not required to be unique by the assignment.
-
+- Email addresses are normalized to lowercase and must be unique.

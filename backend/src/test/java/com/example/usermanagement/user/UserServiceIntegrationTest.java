@@ -1,10 +1,11 @@
 package com.example.usermanagement.user;
 
-import com.example.usermanagement.common.error.UserNotFoundException;
-import com.example.usermanagement.user.api.UserRequest;
-import com.example.usermanagement.user.api.UserResponse;
-import com.example.usermanagement.user.domain.UserService;
-import com.example.usermanagement.user.persistence.UserRepository;
+import com.example.usermanagement.exception.DuplicatedEmailException;
+import com.example.usermanagement.exception.UserNotFoundException;
+import com.example.usermanagement.api.UserRequest;
+import com.example.usermanagement.api.UserResponse;
+import com.example.usermanagement.service.UserService;
+import com.example.usermanagement.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,5 +55,28 @@ class UserServiceIntegrationTest {
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("999999");
     }
-}
 
+    @Test
+    void rejectsDuplicateEmailIgnoringCaseAndWhitespace() {
+        userService.create(new UserRequest("Ada", "Lovelace", "Ada@Example.com"));
+
+        assertThatThrownBy(() -> userService.create(
+                new UserRequest("Grace", "Hopper", "  ada@example.com  ")))
+                .isInstanceOf(DuplicatedEmailException.class)
+                .hasMessage("Email is already registered");
+    }
+
+    @Test
+    void rejectsChangingAUserToAnotherUsersEmailButAllowsKeepingTheirOwn() {
+        UserResponse ada = userService.create(new UserRequest("Ada", "Lovelace", "ada@example.com"));
+        UserResponse grace = userService.create(new UserRequest("Grace", "Hopper", "grace@example.com"));
+
+        assertThat(userService.update(ada.id(),
+                new UserRequest("Ada", "Lovelace", "ADA@EXAMPLE.COM")).email())
+                .isEqualTo("ada@example.com");
+
+        assertThatThrownBy(() -> userService.update(grace.id(),
+                new UserRequest("Grace", "Hopper", "ada@example.com")))
+                .isInstanceOf(DuplicatedEmailException.class);
+    }
+}

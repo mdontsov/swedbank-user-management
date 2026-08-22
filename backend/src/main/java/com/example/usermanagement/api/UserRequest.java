@@ -1,4 +1,4 @@
-package com.example.usermanagement.user.api;
+package com.example.usermanagement.api;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

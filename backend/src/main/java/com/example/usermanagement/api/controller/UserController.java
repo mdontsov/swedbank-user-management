@@ -1,6 +1,8 @@
-package com.example.usermanagement.user.api;
+package com.example.usermanagement.api.controller;
 
-import com.example.usermanagement.user.domain.UserService;
+import com.example.usermanagement.api.UserRequest;
+import com.example.usermanagement.api.UserResponse;
+import com.example.usermanagement.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
