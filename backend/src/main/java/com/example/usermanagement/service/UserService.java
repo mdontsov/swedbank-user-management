@@ -12,4 +12,6 @@ public interface UserService {
     List<UserResponse> findAll();
 
     UserResponse update(long id, UserRequest request);
+
+    void delete(long id);
 }

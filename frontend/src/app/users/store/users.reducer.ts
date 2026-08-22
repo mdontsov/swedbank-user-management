@@ -15,7 +15,7 @@ export const usersReducer = createReducer(
     loading: false,
     error
   })),
-  on(UsersActions.createUser, UsersActions.updateUser, (state) => ({
+  on(UsersActions.createUser, UsersActions.updateUser, UsersActions.deleteUser, (state) => ({
     ...state,
     saving: true,
     error: null
@@ -30,10 +30,19 @@ export const usersReducer = createReducer(
     users: state.users.map((existing) => existing.id === user.id ? user : existing),
     saving: false
   })),
-  on(UsersActions.createUserFailure, UsersActions.updateUserFailure, (state, { error }) => ({
+  on(UsersActions.deleteUserSuccess, (state, { id }) => ({
     ...state,
-    saving: false,
-    error
-  }))
+    users: state.users.filter((user) => user.id !== id),
+    saving: false
+  })),
+  on(
+    UsersActions.createUserFailure,
+    UsersActions.updateUserFailure,
+    UsersActions.deleteUserFailure,
+    (state, { error }) => ({
+      ...state,
+      saving: false,
+      error
+    })
+  )
 );
-

@@ -35,4 +35,3 @@ describe('UserListComponent', () => {
     expect(fixture.nativeElement.querySelector('.table-responsive table')).not.toBeNull();
   });
 });
-

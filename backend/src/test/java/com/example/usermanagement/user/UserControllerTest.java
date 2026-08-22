@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -35,7 +36,7 @@ class UserControllerTest {
     private UserService userService;
 
     @Test
-    void createsUser() throws Exception {
+    void shouldCreateUserAndReturnCreatedResponse() throws Exception {
         UserResponse response = new UserResponse(1L, "Ada", "Lovelace", "ada@example.com");
         when(userService.create(any(UserRequest.class))).thenReturn(response);
 
@@ -52,7 +53,7 @@ class UserControllerTest {
     }
 
     @Test
-    void returnsUsers() throws Exception {
+    void shouldReturnAllUsers() throws Exception {
         when(userService.findAll()).thenReturn(List.of(
                 new UserResponse(1L, "Ada", "Lovelace", "ada@example.com")));
 
@@ -62,7 +63,15 @@ class UserControllerTest {
     }
 
     @Test
-    void returnsFieldErrorsForInvalidRequest() throws Exception {
+    void shouldDeleteUserAndReturnNoContent() throws Exception {
+        mockMvc.perform(delete("/api/users/42"))
+                .andExpect(status().isNoContent());
+
+        verify(userService).delete(42);
+    }
+
+    @Test
+    void shouldReturnFieldErrorsWhenCreateRequestIsInvalid() throws Exception {
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -76,7 +85,7 @@ class UserControllerTest {
     }
 
     @Test
-    void mapsNotFoundThroughRestControllerAdvice() throws Exception {
+    void shouldReturnNotFoundWhenUpdatedUserDoesNotExist() throws Exception {
         when(userService.update(anyLong(), any(UserRequest.class)))
                 .thenThrow(new UserNotFoundException(42));
 
@@ -91,7 +100,7 @@ class UserControllerTest {
     }
 
     @Test
-    void sanitizesUnexpectedRuntimeExceptions() throws Exception {
+    void shouldReturnSanitizedErrorForUnexpectedRuntimeException() throws Exception {
         when(userService.findAll()).thenThrow(new RuntimeException("secret internal detail"));
 
         mockMvc.perform(get("/api/users"))
@@ -100,7 +109,7 @@ class UserControllerTest {
     }
 
     @Test
-    void mapsDuplicateEmailThroughRestControllerAdvice() throws Exception {
+    void shouldReturnConflictWhenEmailIsAlreadyRegistered() throws Exception {
         when(userService.create(any(UserRequest.class)))
                 .thenThrow(new DuplicatedEmailException());
 

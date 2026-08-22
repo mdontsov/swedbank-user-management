@@ -25,4 +25,3 @@ export class UserListComponent implements OnInit {
     this.store.dispatch(UsersActions.loadUsers());
   }
 }
-

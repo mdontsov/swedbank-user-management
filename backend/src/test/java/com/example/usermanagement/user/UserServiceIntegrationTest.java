@@ -31,7 +31,7 @@ class UserServiceIntegrationTest {
     }
 
     @Test
-    void createsLoadsAndUpdatesUserAgainstH2() {
+    void shouldCreateLoadAndUpdateUserAgainstH2() {
         UserResponse created = userService.create(new UserRequest(" Ada ", " Lovelace ", " ada@example.com "));
 
         assertThat(created.id()).isNotNull();
@@ -48,7 +48,7 @@ class UserServiceIntegrationTest {
     }
 
     @Test
-    void rejectsUpdateForUnknownUser() {
+    void shouldRejectUpdateWhenUserDoesNotExist() {
         UserRequest request = new UserRequest("Ada", "Lovelace", "ada@example.com");
 
         assertThatThrownBy(() -> userService.update(999_999, request))
@@ -57,7 +57,24 @@ class UserServiceIntegrationTest {
     }
 
     @Test
-    void rejectsDuplicateEmailIgnoringCaseAndWhitespace() {
+    void shouldDeleteExistingUser() {
+        UserResponse created = userService.create(
+                new UserRequest("Ada", "Lovelace", "ada@example.com"));
+
+        userService.delete(created.id());
+
+        assertThat(userRepository.findById(created.id())).isEmpty();
+    }
+
+    @Test
+    void shouldRejectDeleteWhenUserDoesNotExist() {
+        assertThatThrownBy(() -> userService.delete(999_999))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("999999");
+    }
+
+    @Test
+    void shouldRejectDuplicateEmailIgnoringCaseAndWhitespace() {
         userService.create(new UserRequest("Ada", "Lovelace", "Ada@Example.com"));
 
         assertThatThrownBy(() -> userService.create(
@@ -67,7 +84,7 @@ class UserServiceIntegrationTest {
     }
 
     @Test
-    void rejectsChangingAUserToAnotherUsersEmailButAllowsKeepingTheirOwn() {
+    void shouldAllowKeepingOwnEmailButRejectUsingAnotherUsersEmail() {
         UserResponse ada = userService.create(new UserRequest("Ada", "Lovelace", "ada@example.com"));
         UserResponse grace = userService.create(new UserRequest("Grace", "Hopper", "grace@example.com"));
 

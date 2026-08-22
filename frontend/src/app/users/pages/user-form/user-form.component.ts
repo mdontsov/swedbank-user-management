@@ -65,6 +65,18 @@ export class UserFormComponent implements OnInit {
     }
   }
 
+  remove(): void {
+    if (this.userId === null) {
+      return;
+    }
+
+    const { firstName, lastName } = this.form.getRawValue();
+    const name = `${firstName} ${lastName}`.trim() || 'this user';
+    if (globalThis.confirm(`Delete ${name}? This action cannot be undone.`)) {
+      this.store.dispatch(UsersActions.deleteUser({ id: this.userId }));
+    }
+  }
+
   invalid(field: UserField): boolean {
     const control = this.form.controls[field];
     return control.invalid && control.touched;
@@ -79,4 +91,3 @@ export class UserFormComponent implements OnInit {
     return Number.isSafeInteger(id) && id > 0 ? id : null;
   }
 }
-

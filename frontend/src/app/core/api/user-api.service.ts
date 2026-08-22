@@ -19,5 +19,8 @@ export class UserApiService {
   update(id: number, user: UserInput): Observable<User> {
     return this.http.put<User>(`${this.baseUrl}/${id}`, user);
   }
-}
 
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+}

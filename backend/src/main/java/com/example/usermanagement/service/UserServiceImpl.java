@@ -49,6 +49,14 @@ class UserServiceImpl implements UserService {
         return UserResponse.from(user);
     }
 
+    @Override
+    @Transactional
+    public void delete(long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        userRepository.delete(user);
+    }
+
     private void ensureEmailAvailable(String email) {
         if (userRepository.existsByEmail(email)) {
             throw new DuplicatedEmailException();

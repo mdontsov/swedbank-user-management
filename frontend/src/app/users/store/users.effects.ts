@@ -35,8 +35,16 @@ export class UsersEffects {
     ))
   ));
 
+  readonly deleteUser$ = createEffect(() => this.actions$.pipe(
+    ofType(UsersActions.deleteUser),
+    switchMap(({ id }) => this.api.delete(id).pipe(
+      map(() => UsersActions.deleteUserSuccess({ id })),
+      catchError((error: unknown) => of(UsersActions.deleteUserFailure({ error: this.message(error) })))
+    ))
+  ));
+
   readonly returnToList$ = createEffect(() => this.actions$.pipe(
-    ofType(UsersActions.createUserSuccess, UsersActions.updateUserSuccess),
+    ofType(UsersActions.createUserSuccess, UsersActions.updateUserSuccess, UsersActions.deleteUserSuccess),
     tap(() => void this.router.navigate(['/users']))
   ), { dispatch: false });
 
@@ -50,4 +58,3 @@ export class UsersEffects {
     return 'Unable to complete the request. Please try again.';
   }
 }
-

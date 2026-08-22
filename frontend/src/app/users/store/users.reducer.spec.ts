@@ -25,5 +25,14 @@ describe('usersReducer', () => {
     expect(state.users).toEqual([updatedAda, grace]);
     expect(state.saving).toBe(false);
   });
-});
 
+  it('removes only the deleted user', () => {
+    const grace: User = { id: 2, firstName: 'Grace', lastName: 'Hopper', email: 'grace@example.com' };
+    const initial = { ...initialUsersState, users: [ada, grace], saving: true };
+
+    const state = usersReducer(initial, UsersActions.deleteUserSuccess({ id: ada.id }));
+
+    expect(state.users).toEqual([grace]);
+    expect(state.saving).toBe(false);
+  });
+});
